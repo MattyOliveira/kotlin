@@ -3,6 +3,12 @@ declare namespace JS_TESTS {
     const __doNotImplementIt: unique symbol
     type __doNotImplementIt = typeof __doNotImplementIt
     namespace foo {
+        interface OptionalFieldsInterface {
+            readonly required: number;
+            readonly notRequired?: Nullable<number>;
+        }
+    }
+    namespace foo {
         const _val: number;
         let _var: number;
         const _valCustomWithField: number;
@@ -225,6 +231,7 @@ declare namespace JS_TESTS {
         function createNested1(): typeof foo.Parent.Nested1;
         function createNested2(): foo.Parent.Nested1.Nested2;
         function createNested3(): foo.Parent.Nested1.Nested2.Companion.Nested3;
+        function processOptionalInterface(a: foo.OptionalFieldsInterface): string;
     }
     namespace _objects_ {
         const foo$Parent$Nested1: {

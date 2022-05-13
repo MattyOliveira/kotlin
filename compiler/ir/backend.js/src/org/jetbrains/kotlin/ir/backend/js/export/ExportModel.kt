@@ -59,6 +59,7 @@ class ExportedProperty(
     val isField: Boolean,
     val irGetter: IrFunction?,
     val irSetter: IrFunction?,
+    val isOptional: Boolean = false
 ) : ExportedDeclaration()
 
 
