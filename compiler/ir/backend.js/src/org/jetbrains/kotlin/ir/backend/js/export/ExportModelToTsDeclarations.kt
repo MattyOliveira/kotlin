@@ -202,11 +202,8 @@ class ExportModelToTsDeclarations {
             mutable = false,
             isMember = maybeParentClass != null && !shouldRenderSeparatedAbstractClass,
             isStatic = !ir.isInner && maybeParentClass?.isObject == false,
-            isAbstract = false,
             isProtected = ir.visibility == DescriptorVisibilities.PROTECTED,
             irGetter = irGetter,
-            irSetter = null,
-            isField = false,
         )
 
         return if (!shouldRenderSeparatedAbstractClass) {
@@ -337,18 +334,7 @@ class ExportModelToTsDeclarations {
             ExportedType.TypeOf(innerClassReference)
         )
 
-        return ExportedProperty(
-            name = name,
-            type = type,
-            mutable = false,
-            isMember = true,
-            isStatic = false,
-            isAbstract = false,
-            isProtected = false,
-            isField = false,
-            irGetter = null,
-            irSetter = null
-        )
+        return ExportedProperty(name = name, type = type, mutable = false, isMember = true)
     }
 
     private fun ExportedParameter.toTypeScript(indent: String): String {
