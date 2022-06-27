@@ -441,7 +441,7 @@ public value class Duration internal constructor(private val rawValue: Long) : C
         /**
          * Parses a string that represents a duration in restricted ISO-8601 composite representation
          * and returns the parsed [Duration] value or `null` if the string doesn't represent a duration in the format
-         * not acceptable by [parseIsoString].
+         * acceptable by [parseIsoString].
          *
          * @sample samples.time.Durations.parseIsoString
          */
