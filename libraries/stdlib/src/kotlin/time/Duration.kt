@@ -401,7 +401,14 @@ public value class Duration internal constructor(private val rawValue: Long) : C
         }
 
         /**
-         * Parses a string that represents a duration in ISO-8601 format and returns the parsed [Duration] value.
+         * Parses a string that represents a duration in a restricted ISO-8601 composite representation
+         * and returns the parsed [Duration] value.
+         *
+         * The following restrictions are imposed:
+         *
+         * - The only allowed non-time designator is days (`D`). `Y` (years) and `M` (months) are prohibited.
+         * - Day is considered to be exactly 24 hours (24-hour clock time scale).
+         * - Alternative week-based representation `["P"][number]["W"]` is prohibited.
          *
          * @throws IllegalArgumentException if the string doesn't represent a duration in ISO-8601 format.
          * @sample samples.time.Durations.parseIsoString
@@ -418,7 +425,7 @@ public value class Duration internal constructor(private val rawValue: Long) : C
          *
          * The following formats are accepted:
          *
-         * - ISO-8601 Duration format, e.g. `P1DT2H3M4.058S`, see [toIsoString] and [parseIsoString].
+         * - Restricted ISO-8601 duration composite representation, e.g. `P1DT2H3M4.058S`, see [toIsoString] and [parseIsoString].
          * - The format of string returned by the default [Duration.toString] and `toString` in a specific unit,
          *   e.g. `10s`, `1h 30m` or `-(1h 30m)`.
          *   @sample samples.time.Durations.parse
@@ -430,8 +437,8 @@ public value class Duration internal constructor(private val rawValue: Long) : C
         }
 
         /**
-         * Parses a string that represents a duration in ISO-8601 format and returns the parsed [Duration] value,
-         * or `null` if the string doesn't represent a duration in ISO-8601 format.
+         * Parses a string that represents a duration in restricted ISO-8601 composite representation
+         * and returns the parsed [Duration] value or `null` if the string doesn't represent a duration in this format.
          * @sample samples.time.Durations.parseIsoString
          */
         public fun parseIsoStringOrNull(value: String): Duration? = try {
