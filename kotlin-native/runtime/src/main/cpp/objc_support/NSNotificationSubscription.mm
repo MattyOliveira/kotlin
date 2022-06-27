@@ -11,60 +11,28 @@
 
 using namespace kotlin;
 
-@interface Kotlin_objc_support_NSNotificationSubscriptionImpl : NSObject {
-    NSNotificationCenter* center_;
-    std::function<void()> handler_;
-}
-
-- (instancetype)initWithNotificationCenter:(NSNotificationCenter*)center
-                                      name:(NSNotificationName)name
-                                   handler:(std::function<void()>)handler;
-
-- (void)reset;
-
-- (void)onNotification:(NSNotification*)notification;
-
-@end
-
-@implementation Kotlin_objc_support_NSNotificationSubscriptionImpl
-
-- (instancetype)initWithNotificationCenter:(NSNotificationCenter*)center
-                                      name:(NSNotificationName)name
-                                   handler:(std::function<void()>)handler {
-    if ((self = [super init])) {
-        center_ = center;
-        handler_ = std::move(handler);
-
-        [center_ addObserver:self selector:@selector(onNotification:) name:name object:nil];
-    }
-    return self;
-}
-
-- (void)reset {
-    [center_ removeObserver:self];
-}
-
-- (void)onNotification:(NSNotification*)notification {
-    handler_();
-}
-
-@end
-
 objc_support::NSNotificationSubscription::NSNotificationSubscription(
         NSNotificationCenter* center, NSString* name, std::function<void()> handler) noexcept :
-    impl_([[Kotlin_objc_support_NSNotificationSubscriptionImpl alloc] initWithNotificationCenter:center
-                                                                                            name:name
-                                                                                         handler:std::move(handler)]) {}
+    center_([center retain]),
+    token_([center addObserverForName:name
+                               object:nil
+                                queue:nil
+                           usingBlock:^(NSNotification* notification) {
+                               handler();
+                           }]) {}
 
 objc_support::NSNotificationSubscription::NSNotificationSubscription(NSString* name, std::function<void()> handler) noexcept :
-    impl_([[Kotlin_objc_support_NSNotificationSubscriptionImpl alloc] initWithNotificationCenter:[NSNotificationCenter defaultCenter]
-                                                                                            name:name
-                                                                                         handler:std::move(handler)]) {}
+    NSNotificationSubscription([NSNotificationCenter defaultCenter], name, std::move(handler)) {}
+
+bool objc_support::NSNotificationSubscription::subscribed() const noexcept {
+    return token_ != nil;
+}
 
 void objc_support::NSNotificationSubscription::reset() noexcept {
     @autoreleasepool {
-        [*impl_ reset];
-        impl_.reset();
+        [*center_ removeObserver:token_];
+        center_.reset();
+        token_ = nil;
     }
 }
 

@@ -13,7 +13,29 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "std_support/Memory.hpp"
+
 using namespace kotlin;
+
+using testing::_;
+
+namespace {
+
+class WithDestructorHook;
+
+using DestructorHook = void(WithDestructorHook*);
+
+class WithDestructorHook : private Pinned {
+public:
+    explicit WithDestructorHook(std::function<DestructorHook> hook) : hook_(std::move(hook)) {}
+
+    ~WithDestructorHook() { hook_(this); }
+
+private:
+    std::function<DestructorHook> hook_;
+};
+
+} // namespace
 
 @interface Kotlin_objc_support_NSNotificationSubscriptionTest : NSObject {
     NSNotificationCenter* center_;
@@ -185,6 +207,22 @@ TEST_F(NSNotificationSubscriptionTest, MultipleSubscribers) {
 
     // Make sure to unsubscribe.
     [*subscription1 reset];
+}
+
+TEST_F(NSNotificationSubscriptionTest, DestroysHandler) {
+    constexpr const char* name = "NOTIFICATION_NAME";
+
+    testing::StrictMock<testing::MockFunction<DestructorHook>> destructorHook;
+
+    EXPECT_CALL(destructorHook, Call(_)).Times(0);
+    auto subscription =
+            subscribe(name, [withDestructorHook = std_support::make_shared<WithDestructorHook>(destructorHook.AsStdFunction())] {});
+    post(name);
+    testing::Mock::VerifyAndClearExpectations(&destructorHook);
+
+    EXPECT_CALL(destructorHook, Call(_));
+    subscription.reset();
+    testing::Mock::VerifyAndClearExpectations(&destructorHook);
 }
 
 #endif

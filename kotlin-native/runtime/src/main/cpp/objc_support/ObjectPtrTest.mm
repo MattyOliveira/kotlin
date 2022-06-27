@@ -448,10 +448,11 @@ TEST(ObjectPtrTest, Hashing) {
     testing::Mock::VerifyAndClearExpectations(&destructorHook);
 
     using Hash = std::hash<objc_support::object_ptr<WithDestructorHookObjC>>;
+    using HashImpl = std::hash<NSObject*>;
 
-    EXPECT_THAT(Hash()(obj), ptr1.hash);
-    EXPECT_THAT(Hash()(empty), 0);
-    EXPECT_THAT(Hash()(reset), 0);
+    EXPECT_THAT(Hash()(obj), HashImpl()(ptr1));
+    EXPECT_THAT(Hash()(empty), HashImpl()(nullptr));
+    EXPECT_THAT(Hash()(reset), HashImpl()(nullptr));
 
     EXPECT_CALL(destructorHook, Call(ptr1.impl));
 }

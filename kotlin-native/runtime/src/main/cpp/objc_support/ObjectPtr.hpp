@@ -154,7 +154,7 @@ void swap(kotlin::objc_support::object_ptr<T>& lhs, kotlin::objc_support::object
 
 template <typename T>
 struct hash<kotlin::objc_support::object_ptr<T>> {
-    std::size_t operator()(const kotlin::objc_support::object_ptr<T>& value) { return value.impl_.computeHash(); }
+    std::size_t operator()(const kotlin::objc_support::object_ptr<T>& value) { return std::hash<NSObject*>()(value.impl_.get()); }
 };
 
 // TODO: std::atomic specialization?

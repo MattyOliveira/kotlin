@@ -8,6 +8,7 @@
 #if KONAN_HAS_FOUNDATION_FRAMEWORK
 
 #include <functional>
+#include <objc/objc.h>
 
 #include "ObjCForward.hpp"
 #include "ObjectPtr.hpp"
@@ -15,7 +16,6 @@
 
 OBJC_FORWARD_DECLARE(NSNotificationCenter);
 OBJC_FORWARD_DECLARE(NSString);
-OBJC_FORWARD_DECLARE(Kotlin_objc_support_NSNotificationSubscriptionImpl);
 
 namespace kotlin::objc_support {
 
@@ -30,11 +30,13 @@ public:
     ~NSNotificationSubscription() { reset(); }
 
     void reset() noexcept;
-    bool subscribed() const noexcept { return static_cast<bool>(impl_); }
+    bool subscribed() const noexcept;
     explicit operator bool() const noexcept { return subscribed(); }
 
 private:
-    object_ptr<Kotlin_objc_support_NSNotificationSubscriptionImpl> impl_;
+    object_ptr<NSNotificationCenter> center_;
+    // center_ will hold the strong reference to token_ anyway.
+    id token_;
 };
 
 } // namespace kotlin::objc_support
